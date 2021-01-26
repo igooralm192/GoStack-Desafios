@@ -1,5 +1,6 @@
 import request from 'supertest'
 import { isUuid } from 'uuidv4'
+
 import app from '../app'
 
 describe('Transaction', () => {
@@ -20,13 +21,13 @@ describe('Transaction', () => {
 	})
 
 	it('should be able to list the transactions', async () => {
-		await request(app).post('/transactions').send({
+		const transaction1 = await request(app).post('/transactions').send({
 			title: 'Salary',
 			type: 'income',
 			value: 3000,
 		})
 
-		await request(app).post('/transactions').send({
+		const transaction2 = await request(app).post('/transactions').send({
 			title: 'Bicycle',
 			type: 'outcome',
 			value: 1500,
@@ -37,22 +38,16 @@ describe('Transaction', () => {
 		expect(response.body.transactions).toEqual(
 			expect.arrayContaining([
 				expect.objectContaining({
-					id: expect.any(String),
+					id: transaction1.body.id,
 					title: 'Salary',
 					type: 'income',
 					value: 3000,
 				}),
 				expect.objectContaining({
-					id: expect.any(String),
+					id: transaction2.body.id,
 					title: 'Bicycle',
 					type: 'outcome',
 					value: 1500,
-				}),
-				expect.objectContaining({
-					id: expect.any(String),
-					title: 'Loan',
-					type: 'income',
-					value: 1200,
 				}),
 			]),
 		)
@@ -68,7 +63,7 @@ describe('Transaction', () => {
 		const response = await request(app).post('/transactions').send({
 			title: 'Bicycle',
 			type: 'outcome',
-			value: 3000,
+			value: 9999,
 		})
 
 		expect(response.status).toBe(400)
